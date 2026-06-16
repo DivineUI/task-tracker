@@ -454,10 +454,6 @@
         </table>
       </div>
       <div class="action-bar">
-        <button class="btn btn-word" onclick="downloadWord()">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
-          Download as Word
-        </button>
         <button class="btn btn-pdf" onclick="downloadPDF()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
           Download as PDF
@@ -1129,8 +1125,8 @@ function downloadPDF() {
   // Build table body — each slot on its own line via \n in the cell
   const tableData = task.members.map((m, i) => {
     const slots = m.slots.length > 0
-      ? m.slots.map(s => `${s.start || '--:--'}  →  ${s.end || '--:--'}`).join('\n')
-      : '--:--  →  --:--';
+      ? m.slots.map(s => `${s.start || '--:--'}  -  ${s.end || '--:--'}`).join('\n')
+      : '--:--  -  --:--';
     const mins = calcMemberMins(m.slots);
     return [i + 1, m.name || '', m.reportingTime || '', slots, String(mins), (mins / 60).toFixed(5)];
   });
