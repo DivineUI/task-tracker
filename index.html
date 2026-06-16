@@ -1125,8 +1125,8 @@ function downloadPDF() {
   // Build table body — each slot on its own line via \n in the cell
   const tableData = task.members.map((m, i) => {
     const slots = m.slots.length > 0
-      ? m.slots.map(s => `${s.start || '--:--'}  -  ${s.end || '--:--'}`).join('\n')
-      : '--:--  -  --:--';
+      ? m.slots.map(s => `${s.start || '--:--'}  to  ${s.end || '--:--'}`).join('\n')
+      : '--:--  to  --:--';
     const mins = calcMemberMins(m.slots);
     return [i + 1, m.name || '', m.reportingTime || '', slots, String(mins), (mins / 60).toFixed(5)];
   });
@@ -1136,6 +1136,7 @@ function downloadPDF() {
     head: [['No.', 'Group Member Names', 'Reporting Time', 'Activity Start / End Time(s)', 'Total\nMinutes', 'Total\nHours']],
     body: tableData,
     theme: 'grid',
+    tableWidth: 'auto',
     headStyles: {
       fillColor: [26, 39, 68],
       textColor: 255,
@@ -1154,18 +1155,17 @@ function downloadPDF() {
     },
     alternateRowStyles: { fillColor: [245, 248, 255] },
     columnStyles: {
-      0: { cellWidth: 10, halign: 'center' },
-      1: { cellWidth: 52 },
-      2: { cellWidth: 26, halign: 'center' },
-      3: { cellWidth: 86, overflow: 'linebreak' },
-      4: { cellWidth: 24, halign: 'center', fontStyle: 'bold' },
-      5: { cellWidth: 28, halign: 'center' }
+      0: { cellWidth: 12, halign: 'center' },
+      1: { cellWidth: 60 },
+      2: { cellWidth: 30, halign: 'center' },
+      3: { cellWidth: 95, overflow: 'linebreak' },
+      4: { cellWidth: 30, halign: 'center', fontStyle: 'bold' },
+      5: { cellWidth: 42, halign: 'center' }
     },
     margin: { left: 14, right: 14 },
     tableLineColor: [26, 39, 68],
     tableLineWidth: 0.35,
     didParseCell: (data) => {
-      // Bold the Total Minutes column values
       if (data.section === 'body' && data.column.index === 4) {
         data.cell.styles.fontStyle = 'bold';
         data.cell.styles.fontSize = 11;
