@@ -408,7 +408,13 @@
     </div>
 
     <div class="detail-header">
-      <div class="detail-event-name" id="detail-event-name">—</div>
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
+        <div class="detail-event-name" id="detail-event-name">—</div>
+        <button class="btn btn-outline btn-sm" style="flex-shrink:0;margin-top:2px;" onclick="openEditTaskModal()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          Edit
+        </button>
+      </div>
       <div class="detail-meta-row">
         <div class="detail-meta-item">
           <span class="detail-meta-label">Date</span>
@@ -507,6 +513,53 @@
     <div class="modal-footer">
       <button class="btn btn-outline" onclick="closeModal('modal-new-task')">Cancel</button>
       <button class="btn btn-primary" onclick="createTask()">Create Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT TASK MODAL -->
+<div class="modal-overlay" id="modal-edit-task">
+  <div class="modal">
+    <div class="modal-title">Edit Task</div>
+    <div class="form-grid">
+      <div class="form-group full">
+        <label>Name of Event / Task</label>
+        <input type="text" id="et-name" placeholder="e.g. The Image as a Citizen">
+      </div>
+      <div class="form-group full">
+        <label>Name of Team Activity</label>
+        <select id="et-activity" onchange="toggleOtherActivityEdit()">
+          <option value="">— Select activity —</option>
+          <option value="Check-in managers">Check-in managers</option>
+          <option value="Ushers">Ushers</option>
+          <option value="Food distribution">Food distribution</option>
+          <option value="Accessibility Support">Accessibility Support</option>
+          <option value="DJ and projection">DJ and projection</option>
+          <option value="Guest ushering/protocol">Guest ushering/protocol</option>
+          <option value="Bouncers">Bouncers</option>
+          <option value="Photographer">Photographer</option>
+          <option value="Videographer">Videographer</option>
+          <option value="Clear up">Clear up</option>
+          <option value="Other">Other</option>
+        </select>
+        <input type="text" id="et-activity-other" placeholder="Describe the activity…" style="display:none; margin-top:8px;">
+      </div>
+      <div class="form-group full">
+        <label>Task Lead Name(s)</label>
+        <input type="text" id="et-lead" placeholder="e.g. Joe Doe">
+      </div>
+      <div class="form-group">
+        <label>Event Date</label>
+        <input type="date" id="et-date">
+      </div>
+      <div class="form-group">
+        <label>Event Start Time</label>
+        <input type="time" id="et-start">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('modal-edit-task')">Cancel</button>
+      <button class="btn btn-primary" onclick="saveEditTask()">Save Changes</button>
     </div>
   </div>
 </div>
@@ -646,6 +699,68 @@ function toggleOtherActivity() {
   const other = document.getElementById('nt-activity-other');
   other.style.display = sel.value === 'Other' ? 'block' : 'none';
   if (sel.value !== 'Other') other.value = '';
+}
+
+function toggleOtherActivityEdit() {
+  const sel = document.getElementById('et-activity');
+  const other = document.getElementById('et-activity-other');
+  other.style.display = sel.value === 'Other' ? 'block' : 'none';
+  if (sel.value !== 'Other') other.value = '';
+}
+
+function openEditTaskModal() {
+  const task = tasks.find(t => t.id === currentTaskId);
+  if (!task) return;
+
+  document.getElementById('et-name').value = task.name || '';
+  document.getElementById('et-lead').value = task.lead || '';
+  document.getElementById('et-date').value = task.date || '';
+  document.getElementById('et-start').value = task.startTime || '';
+
+  // Handle activity dropdown
+  const actSel = document.getElementById('et-activity');
+  const actOther = document.getElementById('et-activity-other');
+  const knownOptions = Array.from(actSel.options).map(o => o.value);
+  if (knownOptions.includes(task.activity)) {
+    actSel.value = task.activity;
+    actOther.style.display = 'none';
+    actOther.value = '';
+  } else if (task.activity) {
+    actSel.value = 'Other';
+    actOther.style.display = 'block';
+    actOther.value = task.activity;
+  } else {
+    actSel.value = '';
+    actOther.style.display = 'none';
+    actOther.value = '';
+  }
+
+  openModal('modal-edit-task');
+  setTimeout(() => document.getElementById('et-name').focus(), 50);
+}
+
+function saveEditTask() {
+  const task = tasks.find(t => t.id === currentTaskId);
+  if (!task) return;
+
+  const name = document.getElementById('et-name').value.trim();
+  if (!name) { showToast('Please enter a task name.', 'error'); return; }
+
+  const actSel = document.getElementById('et-activity').value;
+  const actOther = document.getElementById('et-activity-other').value.trim();
+  const activity = actSel === 'Other' ? (actOther || 'Other') : actSel;
+
+  task.name = name;
+  task.activity = activity;
+  task.lead = document.getElementById('et-lead').value.trim();
+  task.date = document.getElementById('et-date').value;
+  task.startTime = document.getElementById('et-start').value;
+
+  saveTasks();
+  closeModal('modal-edit-task');
+  openTask(task.id);
+  renderTaskCards();
+  showToast('Task updated!', 'success');
 }
 
 function createTask() {
