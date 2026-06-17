@@ -252,6 +252,16 @@
     outline: none; transition: border-color .15s;
   }
   .time-input-sm:focus { border-color: var(--accent); background: #fff; }
+  .report-note-input {
+    display: block; margin-top: 6px; width: 90px;
+    height: 26px; padding: 0 7px;
+    border: 1.5px solid var(--border); border-radius: 6px;
+    font-size: .68rem; font-family: 'Inter', sans-serif;
+    background: var(--surface); color: var(--text-muted);
+    outline: none; transition: border-color .15s;
+  }
+  .report-note-input:focus { border-color: var(--accent); background: #fff; color: var(--text); }
+  .report-note-input::placeholder { color: #b8c2d9; }
   .time-sep { font-size: .75rem; color: var(--text-muted); font-weight: 500; }
   .add-slot-btn {
     width: 22px; height: 22px; border-radius: 50%;
@@ -841,6 +851,15 @@ function buildMemberRow(task, member, idx) {
   reportInput.value = member.reportingTime || '';
   reportInput.oninput = () => { member.reportingTime = reportInput.value; saveTasks(); };
   tdReport.appendChild(reportInput);
+
+  const noteInput = document.createElement('input');
+  noteInput.className = 'report-note-input';
+  noteInput.type = 'text';
+  noteInput.placeholder = 'e.g. No-show, no contact';
+  noteInput.value = member.reportingNote || '';
+  noteInput.oninput = () => { member.reportingNote = noteInput.value; saveTasks(); };
+  tdReport.appendChild(noteInput);
+
   tr.appendChild(tdReport);
 
   // Time slots
@@ -1245,7 +1264,8 @@ function downloadPDF() {
       ? m.slots.map(s => `${s.start || '--:--'}  to  ${s.end || '--:--'}`).join('\n')
       : '--:--  to  --:--';
     const mins = calcMemberMins(m.slots);
-    return [i + 1, m.name || '', m.reportingTime || '', slots, String(mins), (mins / 60).toFixed(5)];
+    const reportCell = [m.reportingTime || '', m.reportingNote || ''].filter(Boolean).join('\n');
+    return [i + 1, m.name || '', reportCell || '—', slots, String(mins), (mins / 60).toFixed(5)];
   });
 
   doc.autoTable({
